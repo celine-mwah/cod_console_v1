@@ -1,5 +1,7 @@
 A external tool to adjust filmic values in several Call of Duty titles.
 
+DM me on Discord (ce.line) to report bugs or create issues.
+
 
 
 Titles supported:

@@ -1,4 +1,6 @@
-A tool to adjust filmic values in several Call of Duty titles:
+A external tool to adjust filmic values in several Call of Duty titles.
+
+
 
 Titles supported:
 

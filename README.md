@@ -1,5 +1,5 @@
 A external tool to adjust filmic values in several Call of Duty titles.
-This tool is meant to be used with WAWMVM to record game cinematics.
+This tool is meant to be used with WAWMVM to record game cinematics. (https://codmvm.com/launcher)
 
 Features include:
 - A demo browser to easily select and start your demos 
@@ -7,6 +7,7 @@ Features include:
 - A environment presets tab with various presets
 - A sequence feature that lets you transition from one preset to another
 - A sun tab with an animation/system flicker
+- A fog tab that uses Dvars provided by WAWMVM
 - A keyframing system that lets you create you your own sequences and lets you keyframe every property
 - A config system
 - A hotkey/bind system that let's you set actions to customizable binds

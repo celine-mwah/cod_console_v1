@@ -10,7 +10,7 @@ Features include:
 - A fog tab that uses Dvars provided by WAWMVM
 - A keyframing system that lets you create you your own sequences and lets you keyframe every property
 - A config system
-- A hotkey/bind system that let's you set actions to customizable binds
+- A hotkey/bind system that let's you set actions to customizable binds (For example: E and Q increase/decrease the FOV for improved workflow)
 
   Some features may cause crashes/visual bugs and force you to restart the game, please do not spam them
 

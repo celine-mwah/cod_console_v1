@@ -2,7 +2,7 @@ A external tool to adjust filmic values in several Call of Duty titles.
 This tool is meant to be used with WAWMVM to record game cinematics.
 
 Features include:
-- A demo browser to select your demos
+- A demo browser to easily select and start your demos 
 - A film tweaks tab
 - A environment presets tab with various presets
 - A sequence feature that lets you transition from one preset to another

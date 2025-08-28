@@ -399,33 +399,106 @@ class WAW_App_DPG:
             self._set_keyframable_controls_state(enabled=True)
 
     def start_animation(self, duration_override=None):
+        """Start keyframe animation with extensive debugging"""
+
+        # Add debug message right at the start to confirm method is being called
+        self._add_debug_message("=== START ANIMATION BUTTON PRESSED ===")
 
         try:
-            if self.current_keyframes and len(self.current_keyframes) >= 2:
+            # Debug: Check current keyframes
+            self._add_debug_message(f"Current keyframes count: {len(self.current_keyframes)}")
+            if self.current_keyframes:
+                for i, kf in enumerate(self.current_keyframes):
+                    self._add_debug_message(
+                        f"  Keyframe {i}: time={kf.get('time', 'N/A')}, values={len(kf.get('values', {}))}")
 
-                self._set_keyframable_controls_state(enabled=False)
-                on_complete_callback = lambda: self._set_keyframable_controls_state(enabled=True)
+            # Debug: Check connection
+            self._add_debug_message(f"Memory manager connected: {self.memory_manager.is_connected()}")
 
-                if not self.enhanced_keyframe_editor._validate_keyframes():
-                    self._add_debug_message("Keyframe validation failed. Please fix issues before animating.",
-                                            is_error=True)
-                    self._set_keyframable_controls_state(enabled=True)
-                    return
-
-                total_duration = dpg.get_value("keyframe_total_duration")
-                self.sun_animator.animate_from_keyframes(self.current_keyframes, total_duration,
-                                                         self.easing_functions, on_complete=on_complete_callback)
-                self._add_debug_message(f"Keyframe animation started ({len(self.current_keyframes)} keyframes).")
-                return
-            else:
+            # Check if we have enough keyframes
+            if not self.current_keyframes or len(self.current_keyframes) < 2:
                 self._add_debug_message(
-                    "No keyframes found. Use the Keyframing tab to create keyframes, or use legacy animation from Sun tab.",
-                    is_error=True)
+                    f"FAILED: Need at least 2 keyframes for animation. Currently have {len(self.current_keyframes)}. "
+                    f"Use 'Add Keyframe' button to create keyframes first.",
+                    is_error=True
+                )
                 return
+
+            # Debug: Check validation method exists
+            if not hasattr(self, 'enhanced_keyframe_editor'):
+                self._add_debug_message("FAILED: enhanced_keyframe_editor not found!", is_error=True)
+                return
+
+            if not hasattr(self.enhanced_keyframe_editor, '_validate_keyframes'):
+                self._add_debug_message("FAILED: _validate_keyframes method not found!", is_error=True)
+                return
+
+            # Try validation
+            self._add_debug_message("Running keyframe validation...")
+            validation_result = self.enhanced_keyframe_editor._validate_keyframes()
+            self._add_debug_message(f"Validation result: {validation_result}")
+
+            if not validation_result:
+                self._add_debug_message(
+                    "FAILED: Keyframe validation failed. Check for issues like duplicate times or missing properties.",
+                    is_error=True
+                )
+                return
+
+            # Check connection again
+            if not self.memory_manager.is_connected():
+                self._add_debug_message(
+                    "FAILED: Cannot start animation - Not connected to game. Make sure the game is running.",
+                    is_error=True
+                )
+                return
+
+            # Get duration
+            total_duration = duration_override
+            if total_duration is None:
+                total_duration = dpg.get_value("keyframe_total_duration") if dpg.does_item_exist(
+                    "keyframe_total_duration") else 10.0
+            self._add_debug_message(f"Animation duration: {total_duration}s")
+
+            # Disable controls
+            self._add_debug_message("Disabling keyframable controls...")
+            self._set_keyframable_controls_state(enabled=False)
+
+            # Create completion callback
+            def on_complete():
+                self._set_keyframable_controls_state(enabled=True)
+                self._add_debug_message("=== KEYFRAME ANIMATION COMPLETED ===")
+
+            # Debug: Check if sun_animator exists and has the method
+            if not hasattr(self, 'sun_animator'):
+                self._add_debug_message("FAILED: sun_animator not found!", is_error=True)
+                self._set_keyframable_controls_state(enabled=True)
+                return
+
+            if not hasattr(self.sun_animator, 'animate_from_keyframes'):
+                self._add_debug_message("FAILED: animate_from_keyframes method not found!", is_error=True)
+                self._set_keyframable_controls_state(enabled=True)
+                return
+
+            # Start the animation
+            self._add_debug_message("=== STARTING KEYFRAME ANIMATION ===")
+            self.sun_animator.animate_from_keyframes(
+                self.current_keyframes,
+                total_duration,
+                self.easing_functions,
+                on_complete=on_complete
+            )
+
+            self._add_debug_message(
+                f"SUCCESS: Keyframe animation started - {len(self.current_keyframes)} keyframes over {total_duration}s"
+            )
 
         except Exception as e:
-            self._add_debug_message(f"Error starting animation: {e}", is_error=True)
             self._set_keyframable_controls_state(enabled=True)
+            self._add_debug_message(f"ERROR in start_animation: {e}", is_error=True)
+            import traceback
+            self._add_debug_message(f"Full traceback: {traceback.format_exc()}", is_error=True)
+
 
     def apply_anim_preset(self, sender, app_data):
         preset_name = app_data
@@ -456,22 +529,48 @@ class WAW_App_DPG:
 
     def start_flicker(self):
         try:
-            if not self.memory_manager.is_connected(): return
+            if not self.memory_manager.is_connected():
+                return
+
             strength = self.ui_vars["doubles"]["sun_strength"]
-            preset_name = dpg.get_value("flicker_preset_combo")
-            speed = dpg.get_value("flicker_speed_ms")
-            use_easing = dpg.get_value("flicker_use_easing")
+
+            speed = None
+            if dpg.does_item_exist("flicker_speed_ms"):
+                speed = dpg.get_value("flicker_speed_ms")
+            elif dpg.does_item_exist("main_flicker_speed_ms"):
+                speed = dpg.get_value("main_flicker_speed_ms")
+
+            if speed is None:
+                speed = 500  # Default 500ms
+                self._add_debug_message("Warning: Flicker speed not found, using default 500ms", is_error=False)
+
+            preset_name = "Pulse"
+            if dpg.does_item_exist("flicker_preset_combo"):
+                preset_name = dpg.get_value("flicker_preset_combo") or "Pulse"
+            elif dpg.does_item_exist("main_flicker_preset_combo"):
+                preset_name = dpg.get_value("main_flicker_preset_combo") or "Pulse"
+
+            use_easing = True
+            if dpg.does_item_exist("flicker_use_easing"):
+                use_easing = dpg.get_value("flicker_use_easing")
+            elif dpg.does_item_exist("main_flicker_use_easing"):
+                use_easing = dpg.get_value("main_flicker_use_easing")
+
             self.sun_flicker.start(strength, speed, preset=preset_name, use_easing=use_easing)
             self._add_debug_message(f"'{preset_name}' flicker started.")
+
         except Exception as e:
             self._add_debug_message(f"Error starting flicker: {e}", is_error=True)
 
     def stop_flicker(self):
         if self.sun_flicker.is_flickering:
-            self.sun_flicker.stop();
+            self.sun_flicker.stop()
             self._add_debug_message("Sun flicker stopped.")
         else:
+
             self.sun_flicker.stop()
+            self._add_debug_message("Flicker stop requested (was not running).")
+
 
     def _add_debug_message(self, message, is_error=False):
         timestamp = datetime.datetime.now().strftime("%H:%M:%S")
@@ -619,6 +718,7 @@ class WAW_App_DPG:
     def execute_flicker_preset(self, preset_name):
         self._add_debug_message(f"Hotkey: Executing flicker preset '{preset_name}'.")
         self.start_flicker()
+
 
 
 
@@ -833,6 +933,7 @@ class WAW_App_DPG:
                 with dpg.tab(label="Keyframing"):
                     dpg.add_text("KEYFRAMES DO NOT WORK WITH CL_AVIDEMO -- PLEASE RECORD WITH OBS AND TIMESCALE",  color=(255, 0, 0))
 
+
                     dpg.add_text("Quick Property Controls", color=(255, 255, 0))
                     with dpg.group(horizontal=True):
                         with dpg.child_window(width=200, height=150, border=True):
@@ -900,13 +1001,25 @@ class WAW_App_DPG:
                                                callback=self.enhanced_keyframe_editor._sync_color_value,
                                                user_data="dark_color")
 
+
+
                     dpg.add_separator()
 
                     with dpg.group(horizontal=True):
-                            dpg.add_button(label="Undo", tag="kf_undo_button", callback=self.history_manager.undo,
-                                           enabled=False)
-                            dpg.add_button(label="Redo", tag="kf_redo_button", callback=self.history_manager.redo,
-                                           enabled=False)
+                        dpg.add_button(label="Undo", tag="kf_undo_button", callback=self.history_manager.undo,
+                                       enabled=False)
+                        dpg.add_button(label="Redo", tag="kf_redo_button", callback=self.history_manager.redo,
+                                       enabled=False)
+                        dpg.add_separator()
+                        dpg.add_text("Animation Duration:")
+                        dpg.add_input_float(
+                            tag="keyframe_total_duration",
+                            default_value=10.0,
+                            min_value=0.1,
+                            width=100,
+                            callback=self.enhanced_keyframe_editor._on_duration_change
+                        )
+                        dpg.add_text("seconds")
 
 
                     dpg.add_text("Timeline", color=(255, 255, 0))

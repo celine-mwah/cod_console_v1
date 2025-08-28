@@ -11,7 +11,9 @@ class SunAnimationSystem:
         self.animation_thread = None
         self.stop_animation = False
         self.is_animating = False
+        self._debug = memory_manager._debug
         self.current_interpolated_values = {}  # store currently values
+        self._debug = memory_manager._debug if hasattr(memory_manager, '_debug') else print
 
     @staticmethod
     def lerp(start, end, t):
@@ -58,16 +60,22 @@ class SunAnimationSystem:
         self._start_thread(self._keyframe_worker, on_complete, keyframes, total_duration, easing_functions)
 
     def _validate_keyframes_for_animation(self, keyframes):
-        ## validation for keyframes
         if len(keyframes) < 2:
+            self._debug("Need at least 2 keyframes for animation", is_error=True)
             return False
 
-        for kf in keyframes:
+        for i, kf in enumerate(keyframes):
             if not kf.get('values'):
+                self._debug(f"Keyframe {i + 1} has no properties set", is_error=True)
                 return False
 
         times = [kf['time'] for kf in keyframes]
         if times != sorted(times):
+            self._debug("Keyframes are not in chronological order", is_error=True)
+            return False
+
+        if len(times) != len(set(times)):
+            self._debug("Multiple keyframes have the same time - this will break interpolation", is_error=True)
             return False
 
         return True

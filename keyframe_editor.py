@@ -800,12 +800,17 @@ class EnhancedKeyframeEditor:
             if not kf.get('values'):
                 issues.append(f"Keyframe {i + 1} has no properties")
 
-        total_duration = dpg.get_value("keyframe_total_duration")
-        for i, kf in enumerate(self.app.current_keyframes):
-            if kf['time'] > total_duration:
-                issues.append(f"Keyframe {i + 1} time exceeds total duration")
+        total_duration = None
+        if dpg.does_item_exist("keyframe_total_duration"):
+            total_duration = dpg.get_value("keyframe_total_duration")
 
-        # Display results
+        if total_duration is not None:
+            for i, kf in enumerate(self.app.current_keyframes):
+                if kf['time'] > total_duration:
+                    issues.append(f"Keyframe {i + 1} time exceeds total duration")
+        else:
+            issues.append("Animation duration control not found in UI")
+
         if issues:
             status_text = "Issues found: " + "; ".join(issues)
             color = (255, 100, 100)
@@ -853,7 +858,6 @@ class EnhancedKeyframeEditor:
 
         dpg.delete_item("enhanced_keyframe_table", children_only=True)
 
-        # Re-add columns
         dpg.add_table_column(label="Sel", width_fixed=True, init_width_or_weight=30, parent="enhanced_keyframe_table")
         dpg.add_table_column(label="Time", width_fixed=True, init_width_or_weight=80, parent="enhanced_keyframe_table")
         dpg.add_table_column(label="Easing", width_fixed=True, init_width_or_weight=100,
@@ -865,7 +869,6 @@ class EnhancedKeyframeEditor:
 
         for i, kf in enumerate(self.app.current_keyframes):
             with dpg.table_row(parent="enhanced_keyframe_table"):
-                # Selection checkbox
                 def toggle_select(s, d, u):
                     keyframes_copy = copy.deepcopy(self.app.current_keyframes)
                     keyframes_copy[u]['selected'] = d
@@ -873,7 +876,6 @@ class EnhancedKeyframeEditor:
 
                 dpg.add_checkbox(default_value=kf.get('selected', False), user_data=i, callback=toggle_select)
 
-                # Time input
                 def time_changed(s, d, u):
                     keyframes_copy = copy.deepcopy(self.app.current_keyframes)
                     keyframes_copy[u]['time'] = d
@@ -883,7 +885,6 @@ class EnhancedKeyframeEditor:
                 dpg.add_input_float(default_value=kf['time'], user_data=i, callback=time_changed,
                                     width=80, step=0.1, format="%.2f")
 
-                # Easing combo
                 def easing_changed(s, d, u):
                     keyframes_copy = copy.deepcopy(self.app.current_keyframes)
                     keyframes_copy[u]['easing'] = d
@@ -892,14 +893,12 @@ class EnhancedKeyframeEditor:
                 dpg.add_combo(items=self.app.easing_options, default_value=kf.get('easing', 'Linear'),
                               user_data=i, callback=easing_changed, width=100)
 
-                # Properties summary
                 prop_count = len(kf.get('values', {}))
                 prop_names = ', '.join(list(kf.get('values', {}).keys())[:3])
                 if prop_count > 3:
                     prop_names += f" (+{prop_count - 3} more)"
                 dpg.add_text(f"{prop_count} props: {prop_names}")
 
-                # Action buttons
                 with dpg.group(horizontal=True):
                     dpg.add_button(label="Edit", user_data=i, callback=self.app._open_keyframe_editor_modal, width=50)
 
@@ -911,12 +910,9 @@ class EnhancedKeyframeEditor:
                     dpg.add_button(label="Del", user_data=i, callback=delete_keyframe, width=50)
 
     def sync_from_main_ui(self):
-        """Sync keyframe tab sliders with main UI values - enhanced for all properties"""
-        # Update keyframe tab sliders from main UI
         for prop in self.keyframeable_properties:
             kf_tag = f"kf_{prop}"
             if dpg.does_item_exist(kf_tag):
-                # Check both regular and main_ prefixed tags
                 main_value = None
                 if dpg.does_item_exist(prop):
                     main_value = dpg.get_value(prop)
@@ -926,14 +922,12 @@ class EnhancedKeyframeEditor:
                 if main_value is not None:
                     dpg.set_value(kf_tag, main_value)
 
-        # Update color sliders - enhanced for all color properties
         for prop in self.color_properties:
             kf_tag = f"kf_{prop}"
             if dpg.does_item_exist(kf_tag):
-                # Check both regular and main_ prefixed tags
                 main_color = None
                 if dpg.does_item_exist(prop):
-                    main_color = dpg.get_value(prop)  # Already in 0-1 range
+                    main_color = dpg.get_value(prop)
                 elif dpg.does_item_exist(f"main_{prop}"):
                     main_color = dpg.get_value(f"main_{prop}")
 
@@ -941,7 +935,6 @@ class EnhancedKeyframeEditor:
                     dpg.set_value(kf_tag, main_color)
 
     def on_keyframes_changed(self):
-        """Call this whenever keyframes are modified"""
         self.timeline_widget.update_timeline()
         self.update_keyframe_list()
 
@@ -955,7 +948,6 @@ class EnhancedKeyframeEditor:
             self.app._add_debug_message("Need at least 2 selected keyframes to reverse.", is_error=True)
             return
 
-        # Get time range
         min_time = min(kf['time'] for kf in selected_kfs)
         max_time = max(kf['time'] for kf in selected_kfs)
 
@@ -963,7 +955,6 @@ class EnhancedKeyframeEditor:
 
         for kf in keyframes_copy:
             if kf.get('selected', False):
-                # Reverse time position within the selected range
                 kf['time'] = max_time - (kf['time'] - min_time)
 
         keyframes_copy.sort(key=lambda k: k['time'])

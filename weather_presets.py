@@ -9,120 +9,120 @@ ENVIRONMENT_PRESETS = {
     "Clear Day": {
         "sun_strength": 1.5, "sun_direction": {"x": -45, "y": 60}, "sun_color": [1.2, 1.1, 1.0],
         "light_color": [1.1, 1.05, 1.0], "dark_color": [0.2, 0.2, 0.25], "fog_enabled": False,
-        "fog_start": 1000, "brightness": 0.05, "contrast": 1.1, "desaturation": 0.1
+        "fog_start": 1000, "brightness": 0, "contrast": 1.1, "desaturation": 0.1
     },
     "Golden Hour": {
         "sun_strength": 2.0, "sun_direction": {"x": 80, "y": 15}, "sun_color": [2.0, 1.2, 0.5],
         "light_color": [1.8, 1.3, 0.8], "dark_color": [0.3, 0.2, 0.1], "fog_enabled": True,
-        "fog_color": [1.0, 0.6, 0.4], "fog_start": 1000, "brightness": 0.1, "contrast": 1.1, "desaturation": 0.0
+        "fog_color": [1.0, 0.6, 0.4], "fog_start": 1000, "brightness": 0, "contrast": 1.1, "desaturation": 0.0
     },
     "Overcast": {
         "sun_strength": 0.7, "sun_direction": {"x": -30, "y": 70}, "sun_color": [0.8, 0.9, 1.0],
         "light_color": [0.9, 0.95, 1.0], "dark_color": [0.25, 0.25, 0.3], "fog_enabled": True,
-        "fog_color": [0.6, 0.6, 0.65], "fog_start": 1000, "brightness": -0.1, "contrast": 1.1, "desaturation": 0.4
+        "fog_color": [0.6, 0.6, 0.65], "fog_start": 1000, "brightness": 0, "contrast": 1.1, "desaturation": 0.4
     },
     "Night": {
         "sun_strength": 0.2, "sun_direction": {"x": -90, "y": 45}, "sun_color": [0.1, 0.2, 0.4],
         "light_color": [0.2, 0.3, 0.5], "dark_color": [0.1, 0.1, 0.1], "fog_enabled": False,
-        "fog_start": 1000, "brightness": -0.5, "contrast": 1.1, "desaturation": 0.2
+        "fog_start": 1000, "brightness": 0, "contrast": 1.1, "desaturation": 0.2
     },
     "Pitch Black": {
         "sun_strength": 0.0, "sun_direction": {"x": 0, "y": 90}, "sun_color": [0.0, 0.0, 0.0],
         "light_color": [0.0, 0.0, 0.0], "dark_color": [0.0, 0.0, 0.0], "fog_enabled": False,
-        "brightness": -0.9, "contrast": 1.0, "desaturation": 1.0
+        "brightness": 0, "contrast": 1.0, "desaturation": 1.0
     },
     "Dawn": {
         "sun_strength": 1.8, "sun_direction": {"x": 80, "y": 5}, "sun_color": [1.0, 0.8, 0.6],
         "light_color": [1.0, 0.9, 0.8], "dark_color": [0.6, 0.5, 0.5], "fog_enabled": True,
-        "fog_color": [0.9, 0.8, 0.7], "fog_start": 400, "brightness": 0.1, "contrast": 1.1, "desaturation": 0.15
+        "fog_color": [0.9, 0.8, 0.7], "fog_start": 400, "brightness": 0, "contrast": 1.1, "desaturation": 0.15
     },
     "Dusk": {
         "sun_strength": 2.0, "sun_direction": {"x": -80, "y": 10}, "sun_color": [1.0, 0.6, 0.4],
         "light_color": [1.0, 0.7, 0.5], "dark_color": [0.7, 0.4, 0.3], "fog_enabled": True,
-        "fog_color": [0.9, 0.6, 0.5], "fog_start": 600, "brightness": 0.1, "contrast": 1.1, "desaturation": 0.05
+        "fog_color": [0.9, 0.6, 0.5], "fog_start": 600, "brightness": 0, "contrast": 1.1, "desaturation": 0.05
     },
     "Typhoon": {
         "sun_strength": 0.4, "sun_direction": {"x": -60, "y": 60}, "sun_color": [0.4, 0.5, 0.6],
         "light_color": [0.5, 0.55, 0.6], "dark_color": [0.2, 0.2, 0.25], "fog_enabled": True,
-        "fog_color": [0.3, 0.35, 0.4], "fog_start": 500, "brightness": -0.4, "contrast": 1.1, "desaturation": 0.7
+        "fog_color": [0.3, 0.35, 0.4], "fog_start": 500, "brightness": 0, "contrast": 1.1, "desaturation": 0.7
     },
 
     # --- Cinematic & Stylistic ---
     "Cinematic Teal & Orange": {
         "sun_strength": 1.6, "sun_direction": {"x": 75, "y": 20}, "sun_color": [1.0, 0.7, 0.4],
         "light_color": [1.0, 0.8, 0.6], "dark_color": [0.1, 0.2, 0.3], "fog_enabled": False,
-        "brightness": 0.05, "contrast": 1.1, "desaturation": 0.1
+        "brightness": 0, "contrast": 1.1, "desaturation": 0.1
     },
     "Bleach Bypass": {
         "sun_strength": 1.8, "sun_direction": {"x": -50, "y": 70}, "sun_color": [1.2, 1.2, 1.2],
         "light_color": [1.1, 1.1, 1.1], "dark_color": [0.2, 0.2, 0.2], "fog_enabled": False,
-        "brightness": 0.15, "contrast": 1.1, "desaturation": 0.8
+        "brightness": 0, "contrast": 1.1, "desaturation": 0.8
     },
     "Noir Film": {
         "sun_strength": 1.5, "sun_direction": {"x": 70, "y": 30}, "sun_color": [1.0, 1.0, 1.0],
         "light_color": [1.0, 1.0, 1.0], "dark_color": [0.1, 0.1, 0.1], "fog_enabled": True,
-        "fog_color": [0.5, 0.5, 0.5], "fog_start": 1000, "brightness": 0.0, "contrast": 1.1, "desaturation": 1.0
+        "fog_color": [0.5, 0.5, 0.5], "fog_start": 1000, "brightness": 0, "contrast": 1.1, "desaturation": 1.0
     },
     "Dreamscape": {
         "sun_strength": 1.5, "sun_direction": {"x": 80, "y": 40}, "sun_color": [1.0, 0.8, 0.9],
         "light_color": [1.2, 0.9, 1.1], "dark_color": [0.2, 0.2, 0.3], "fog_enabled": True,
-        "fog_color": [0.9, 0.8, 0.85], "fog_start": 1000, "brightness": 0.1, "contrast": 1.0, "desaturation": 0.1
+        "fog_color": [0.9, 0.8, 0.85], "fog_start": 1000, "brightness": 0, "contrast": 1.0, "desaturation": 0.1
     },
     "Psychedelic Trip": {
         "sun_strength": 2.0, "sun_direction": {"x": 0, "y": 45}, "sun_color": [2.0, 0.0, 1.0],
         "light_color": [0.0, 2.0, 1.0], "dark_color": [1.0, 1.0, 0.0], "fog_enabled": False,
-        "brightness": 0.1, "contrast": 1.1, "desaturation": 0.0
+        "brightness": 0, "contrast": 1.1, "desaturation": 0.0
     },
     "Vaporwave Dream": {
         "sun_strength": 2.0, "sun_direction": {"x": -80, "y": 25}, "sun_color": [2.0, 0.5, 1.5],
         "light_color": [0.5, 1.5, 2.0], "dark_color": [0.2, 0.1, 0.3], "fog_enabled": True,
-        "fog_color": [0.5, 0.1, 0.4], "fog_start": 1000, "brightness": 0.1, "contrast": 1.1, "desaturation": 0.0
+        "fog_color": [0.5, 0.1, 0.4], "fog_start": 1000, "brightness": 0, "contrast": 1.1, "desaturation": 0.0
     },
     "Apocalypse Orange": {
         "sun_strength": 2.2, "sun_direction": {"x": 60, "y": 10}, "sun_color": [1.0, 0.6, 0.2],
         "light_color": [1.0, 0.7, 0.3], "dark_color": [0.3, 0.2, 0.1], "fog_enabled": True,
-        "fog_color": [1.0, 0.6, 0.2], "fog_start": 1000, "brightness": 0.1, "contrast": 1.1, "desaturation": 0.4
+        "fog_color": [1.0, 0.6, 0.2], "fog_start": 1000, "brightness": 0, "contrast": 1.1, "desaturation": 0.4
     },
 
     # --- Scary & Eerie (THICK FOG) ---
     "Silent Hill": {
         "sun_strength": 0.4, "sun_direction": {"x": 10, "y": 30}, "sun_color": [0.7, 0.6, 0.5],
         "light_color": [0.8, 0.7, 0.6], "dark_color": [0.2, 0.2, 0.2], "fog_enabled": True,
-        "fog_color": [0.5, 0.45, 0.4], "fog_start": 50, "brightness": -0.2, "contrast": 1.1, "desaturation": 0.8,
+        "fog_color": [0.5, 0.45, 0.4], "fog_start": 50, "brightness": 0, "contrast": 1.1, "desaturation": 0.8,
         "flicker": {"preset": "Candle", "speed": 1200, "easing": True}
     },
     "Blood Moon": {
         "sun_strength": 1.2, "sun_direction": {"x": 20, "y": 25}, "sun_color": [1.0, 0.1, 0.1],
         "light_color": [0.9, 0.2, 0.2], "dark_color": [0.2, 0.1, 0.1], "fog_enabled": True,
-        "fog_color": [0.4, 0.05, 0.05], "fog_start": 1000, "brightness": -0.3, "contrast": 1.1, "desaturation": 0.5
+        "fog_color": [0.4, 0.05, 0.05], "fog_start": 1000, "brightness": 0, "contrast": 1.1, "desaturation": 0.5
     },
     "Abandoned Hospital": {
         "sun_strength": 0.3, "sun_direction": {"x": -70, "y": 80}, "sun_color": [0.6, 0.8, 0.7],
         "light_color": [0.7, 0.9, 0.8], "dark_color": [0.1, 0.15, 0.15], "fog_enabled": True,
-        "fog_color": [0.4, 0.5, 0.45], "fog_start": 600, "brightness": -0.4, "contrast": 1.1, "desaturation": 0.6,
+        "fog_color": [0.4, 0.5, 0.45], "fog_start": 600, "brightness": 0, "contrast": 1.1, "desaturation": 0.6,
         "flicker": {"preset": "Pulse", "speed": 2000, "easing": True}
     },
     "Basement Interrogation": {
         "sun_strength": 0.8, "sun_direction": {"x": 0, "y": 85}, "sun_color": [1.0, 0.9, 0.7],
         "light_color": [0.3, 0.3, 0.25], "dark_color": [0.1, 0.1, 0.1], "fog_enabled": False,
-        "brightness": -0.6, "contrast": 1.1, "desaturation": 0.7,
+        "brightness": -0.1, "contrast": 1.1, "desaturation": 0.7,
         "flicker": {"preset": "Heartbeat", "speed": 900}
     },
     "Cursed Swamp": {
         "sun_strength": 0.2, "sun_direction": {"x": 40, "y": 20}, "sun_color": [0.4, 0.5, 0.3],
         "light_color": [0.5, 0.6, 0.4], "dark_color": [0.1, 0.15, 0.1], "fog_enabled": True,
-        "fog_color": [0.2, 0.3, 0.15], "fog_start": 100, "brightness": -0.4, "contrast": 1.1, "desaturation": 0.5
+        "fog_color": [0.2, 0.3, 0.15], "fog_start": 100, "brightness": -0.1, "contrast": 1.1, "desaturation": 0.5
     },
     "Verrückt Asylum": {
         "sun_strength": 0.4, "sun_direction": {"x": 10, "y": 80}, "sun_color": [0.6, 0.7, 0.5],
         "light_color": [0.7, 0.8, 0.7], "dark_color": [0.15, 0.2, 0.15], "fog_enabled": True,
-        "fog_color": [0.2, 0.25, 0.2], "fog_start": 800, "brightness": -0.3, "contrast": 1.1, "desaturation": 0.4,
+        "fog_color": [0.2, 0.25, 0.2], "fog_start": 800, "brightness": -0.2, "contrast": 1.2, "desaturation": 0.4,
         "flicker": {"preset": "Faulty", "speed": 2000, "easing": True}
     },
     "Deep Sea Trench": {
         "sun_strength": 0.5, "sun_direction": {"x": 0, "y": 90}, "sun_color": [0.0, 0.2, 0.5],
         "light_color": [0.1, 0.3, 0.6], "dark_color": [0.1, 0.1, 0.1], "fog_enabled": True,
-        "fog_color": [0.0, 0.05, 0.1], "fog_start": 80, "brightness": -0.7, "contrast": 1.1, "desaturation": 0.2
+        "fog_color": [0.0, 0.05, 0.1], "fog_start": 80, "brightness": 0, "contrast": 1.1, "desaturation": 0.2
     },
     "Dying Star": {
         "sun_strength": 4.0, "sun_direction": {"x": 0, "y": 20}, "sun_color": [2.0, 0.1, 0.1],
@@ -132,7 +132,7 @@ ENVIRONMENT_PRESETS = {
     "Interstellar Void": {
         "sun_strength": 0.1, "sun_direction": {"x": 0, "y": 0}, "sun_color": [0.1, 0.1, 0.2],
         "light_color": [0.1, 0.1, 0.2], "dark_color": [0.1, 0.1, 0.1], "fog_enabled": False,
-        "brightness": -0.9, "contrast": 1.0, "desaturation": 0.5
+        "brightness": 0, "contrast": 1.0, "desaturation": 0.5
     },
 
     # --- WaW Campaign Inspired ---
@@ -155,7 +155,7 @@ ENVIRONMENT_PRESETS = {
     "Jungle Night Assault": {
         "sun_strength": 0.1, "sun_direction": {"x": -120, "y": 40}, "sun_color": [0.05, 0.1, 0.2],
         "light_color": [0.1, 0.15, 0.25], "dark_color": [0.1, 0.1, 0.1], "fog_enabled": True,
-        "fog_color": [0.0, 0.05, 0.02], "fog_start": 300, "brightness": -0.7, "contrast": 1.1, "desaturation": 0.3
+        "fog_color": [0.0, 0.05, 0.02], "fog_start": 300, "brightness": 0, "contrast": 1.1, "desaturation": 0.3
     },
     "Mustard Gas": {
         "sun_strength": 1.0, "sun_direction": {"x": 25, "y": 50}, "sun_color": [1.0, 1.0, 0.4],
@@ -170,12 +170,12 @@ ENVIRONMENT_PRESETS = {
     "Arctic Blizzard": {
         "sun_strength": 1.5, "sun_direction": {"x": 0, "y": 60}, "sun_color": [0.9, 0.9, 1.0],
         "light_color": [0.95, 0.95, 1.0], "dark_color": [0.7, 0.7, 0.75], "fog_enabled": True,
-        "fog_color": [0.95, 0.95, 1.0], "fog_start": 80, "brightness": 0.25, "contrast": 1.0, "desaturation": 0.8
+        "fog_color": [0.95, 0.95, 1.0], "fog_start": 80, "brightness": 0, "contrast": 1.0, "desaturation": 0.8
     },
     "Hellscape": {
         "sun_strength": 3.0, "sun_direction": {"x": 0, "y": 30}, "sun_color": [2.0, 0.2, 0.0],
         "light_color": [2.0, 0.3, 0.0], "dark_color": [0.2, 0.1, 0.1], "fog_enabled": True,
-        "fog_color": [0.5, 0.1, 0.0], "fog_start": 1000, "brightness": -0.2, "contrast": 1.1, "desaturation": 0.1,
+        "fog_color": [0.5, 0.1, 0.0], "fog_start": 1000, "brightness": 0, "contrast": 1.1, "desaturation": 0.1,
         "flicker": {"preset": "Candle", "speed": 100, "easing": True}
     },
 }

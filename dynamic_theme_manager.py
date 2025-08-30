@@ -14,15 +14,23 @@ class DynamicThemeManager:
         self.animation_thread = None
         self.stop_animation = False
 
-        ## Color schemes
+        ## themes
         self.color_schemes = {
             "Default": {
                 "primary": [255, 105, 180],
                 "secondary": [255, 255, 0],
                 "background": [40, 40, 40],
                 "surface": [25, 25, 25],
-                "text": [5, 5, 5],
+                "text": [255, 255, 255],
                 "accent": [100, 200, 255]
+            },
+            "Yelvis": {
+                "primary": [255, 183, 197],
+                "secondary": [187, 222, 251],
+                "background": [235, 200, 225],
+                "surface": [252, 240, 244],
+                "text": [50, 40, 45],
+                "accent": [255, 105, 180]
             },
             "Ocean": {
                 "primary": [0, 150, 255],
@@ -65,11 +73,11 @@ class DynamicThemeManager:
         self.color_transition_speed = 3.0
 
         self.original_theme = self.color_schemes["Default"].copy()
+
         self._start_rainbow_animation()
 
-    ## UI creation
     def create_theme_ui(self, parent_tag):
-        with dpg.collapsing_header(label="UI Theme Settings", default_open=False, parent=parent_tag):
+        with dpg.collapsing_header(label="Theme Settings", default_open=False, parent=parent_tag):
             dpg.add_combo(
                 label="Color Scheme",
                 tag="theme_selector",
@@ -86,7 +94,7 @@ class DynamicThemeManager:
                 dpg.add_checkbox(
                     label="Rainbow Mode",
                     tag="rainbow_mode_check",
-                    default_value=True,
+                    default_value=self.rainbow_mode,  # Use the class variable for default
                     callback=self._toggle_rainbow_mode
                 )
                 dpg.add_checkbox(
@@ -114,7 +122,7 @@ class DynamicThemeManager:
 
             dpg.add_text("Custom Colors", color=(255, 255, 0))
             with dpg.group(horizontal=True):
-                with dpg.child_window(width=300, height=200):
+                with dpg.child_window(width=250, height=200):
                     dpg.add_color_edit(
                         label="Primary",
                         tag="custom_primary_color",
@@ -161,14 +169,27 @@ class DynamicThemeManager:
                     )
 
             with dpg.group(horizontal=True):
-                dpg.add_button(label="Save Theme", callback=self._save_theme_to_file, width=70)
-                dpg.add_button(label="Load Theme", callback=self._load_theme_from_file, width=70)
-                dpg.add_button(label="Reset to Default", callback=self._reset_to_default, width=70)
+                dpg.add_button(label="Save Theme", callback=self._save_theme_to_file, width=90)
+                dpg.add_button(label="Load Theme", callback=self._load_theme_from_file, width=90)
+                dpg.add_button(label="Reset to Default", callback=self._reset_to_default, width=120)
 
-    ## Theme application
+
     def _apply_theme(self, sender=None, theme_name=None):
         if theme_name is None:
             theme_name = dpg.get_value("theme_selector") if dpg.does_item_exist("theme_selector") else "Default"
+
+        is_dynamic_theme_running = self.rainbow_mode or self.pulse_mode or self.reactive_mode
+        if theme_name != "Custom" or not is_dynamic_theme_running:
+            self._stop_animation()
+            self.rainbow_mode = False
+            self.pulse_mode = False
+            self.reactive_mode = False
+            if dpg.does_item_exist("rainbow_mode_check"):
+                dpg.set_value("rainbow_mode_check", False)
+            if dpg.does_item_exist("pulse_mode_check"):
+                dpg.set_value("pulse_mode_check", False)
+            if dpg.does_item_exist("reactive_mode_check"):
+                dpg.set_value("reactive_mode_check", False)
 
         if theme_name not in self.color_schemes:
             return
@@ -185,27 +206,21 @@ class DynamicThemeManager:
                     dpg.add_theme_color(dpg.mvThemeCol_Text, colors["text"])
 
                 if "primary" in colors:
-                    button_color = [c * 0.4 for c in colors["primary"][:3]] + [255]
-                    button_hover = [c * 0.6 for c in colors["primary"][:3]] + [255]
-                    button_active = [c * 0.8 for c in colors["primary"][:3]] + [255]
-
-                    dpg.add_theme_color(dpg.mvThemeCol_Button, button_color[:3])
-                    dpg.add_theme_color(dpg.mvThemeCol_ButtonHovered, button_hover[:3])
-                    dpg.add_theme_color(dpg.mvThemeCol_ButtonActive, button_active[:3])
+                    dpg.add_theme_color(dpg.mvThemeCol_Button, [min(255, c * 0.8) for c in colors["primary"]])
+                    dpg.add_theme_color(dpg.mvThemeCol_ButtonHovered, colors["primary"])
+                    dpg.add_theme_color(dpg.mvThemeCol_ButtonActive, [min(255, c * 1.2) for c in colors["primary"]])
 
                     dpg.add_theme_color(dpg.mvThemeCol_SliderGrab, colors["primary"])
                     dpg.add_theme_color(dpg.mvThemeCol_SliderGrabActive, [min(255, c * 1.2) for c in colors["primary"]])
-
                     dpg.add_theme_color(dpg.mvThemeCol_CheckMark, colors["primary"])
                     dpg.add_theme_color(dpg.mvThemeCol_Header, colors["primary"])
                     dpg.add_theme_color(dpg.mvThemeCol_HeaderHovered, [min(255, c * 1.2) for c in colors["primary"]])
                     dpg.add_theme_color(dpg.mvThemeCol_HeaderActive, [min(255, c * 1.4) for c in colors["primary"]])
 
                 if "surface" in colors:
-                    frame_color = [c * 1.5 for c in colors["surface"][:3]]
-                    dpg.add_theme_color(dpg.mvThemeCol_FrameBg, frame_color[:3])
-                    dpg.add_theme_color(dpg.mvThemeCol_FrameBgHovered, [min(255, c * 1.2) for c in frame_color[:3]])
-                    dpg.add_theme_color(dpg.mvThemeCol_FrameBgActive, [min(255, c * 1.4) for c in frame_color[:3]])
+                    dpg.add_theme_color(dpg.mvThemeCol_FrameBg, colors["surface"])
+                    dpg.add_theme_color(dpg.mvThemeCol_FrameBgHovered, [min(255, c * 1.2) for c in colors["surface"]])
+                    dpg.add_theme_color(dpg.mvThemeCol_FrameBgActive, [min(255, c * 1.4) for c in colors["surface"]])
 
                     dpg.add_theme_color(dpg.mvThemeCol_Tab, colors["surface"])
                     dpg.add_theme_color(dpg.mvThemeCol_TabActive, [min(255, c * 1.5) for c in colors["surface"]])
@@ -232,6 +247,9 @@ class DynamicThemeManager:
             self.color_schemes["Custom"] = {}
 
         self.color_schemes["Custom"][color_type] = rgb_color
+
+        if dpg.does_item_exist("theme_selector"):
+            dpg.set_value("theme_selector", "Custom")
 
         if self.current_theme == "Custom":
             self._apply_theme(theme_name="Custom")
@@ -280,8 +298,12 @@ class DynamicThemeManager:
         self._stop_animation()
         self.stop_animation = False
 
+        if dpg.does_item_exist("theme_selector"):
+            dpg.set_value("theme_selector", "Custom")
+
         def rainbow_worker():
             hue = 0
+            base = self.color_schemes["Default"].copy()
             while not self.stop_animation and self.rainbow_mode:
                 rgb = colorsys.hsv_to_rgb(hue / 360.0, 0.7, 1.0)
                 primary_color = [int(c * 255) for c in rgb]
@@ -290,14 +312,12 @@ class DynamicThemeManager:
                 rgb_comp = colorsys.hsv_to_rgb(comp_hue / 360.0, 0.7, 1.0)
                 secondary_color = [int(c * 255) for c in rgb_comp]
 
-                self.color_schemes["Custom"] = {
-                    "primary": primary_color,
-                    "secondary": secondary_color,
-                    "background": [40, 40, 40],
-                    "surface": [25, 25, 25],
-                    "text": [255, 255, 255],
-                    "accent": secondary_color
-                }
+                self.color_schemes["Custom"]["primary"] = primary_color
+                self.color_schemes["Custom"]["secondary"] = secondary_color
+                self.color_schemes["Custom"]["accent"] = secondary_color
+                for key, value in base.items():
+                    if key not in self.color_schemes["Custom"]:
+                        self.color_schemes["Custom"][key] = value
 
                 self._apply_theme(theme_name="Custom")
 
@@ -312,22 +332,26 @@ class DynamicThemeManager:
         self._stop_animation()
         self.stop_animation = False
 
+        if dpg.does_item_exist("theme_selector"):
+            dpg.set_value("theme_selector", "Custom")
+
         def pulse_worker():
             phase = 0
             base_colors = self.color_schemes.get(self.current_theme, self.color_schemes["Default"]).copy()
+            if not base_colors or 'primary' not in base_colors:
+                base_colors = self.color_schemes["Default"].copy()
 
             while not self.stop_animation and self.pulse_mode:
                 intensity = (math.sin(phase) + 1) / 2
 
-                if "primary" in base_colors:
-                    pulsed_primary = [
-                        int(base_colors["primary"][i] * (0.5 + intensity * 0.5))
-                        for i in range(3)
-                    ]
+                pulsed_primary = [
+                    int(base_colors["primary"][i] * (0.5 + intensity * 0.5))
+                    for i in range(3)
+                ]
 
-                    self.color_schemes["Custom"] = base_colors.copy()
-                    self.color_schemes["Custom"]["primary"] = pulsed_primary
-                    self._apply_theme(theme_name="Custom")
+                self.color_schemes["Custom"] = base_colors.copy()
+                self.color_schemes["Custom"]["primary"] = pulsed_primary
+                self._apply_theme(theme_name="Custom")
 
                 phase += 0.1 * self.color_transition_speed
                 time.sleep(0.05)
@@ -340,35 +364,19 @@ class DynamicThemeManager:
         self._stop_animation()
         self.stop_animation = False
 
+        if dpg.does_item_exist("theme_selector"):
+            dpg.set_value("theme_selector", "Custom")
+
         def reactive_worker():
             while not self.stop_animation and self.reactive_mode:
                 if hasattr(self.app, 'sun_animator') and self.app.sun_animator.is_animating:
-                    reactive_colors = {
-                        "primary": [255, 150, 0],
-                        "secondary": [255, 255, 100],
-                        "background": [40, 30, 20],
-                        "surface": [50, 40, 30],
-                        "text": [255, 255, 255],
-                        "accent": [255, 200, 100]
-                    }
+                    reactive_colors = self.color_schemes.get("Sunset", self.original_theme)
                 elif hasattr(self.app, 'memory_manager') and not self.app.memory_manager.is_connected():
-                    reactive_colors = {
-                        "primary": [255, 50, 50],
-                        "secondary": [255, 150, 150],
-                        "background": [40, 20, 20],
-                        "surface": [50, 25, 25],
-                        "text": [255, 200, 200],
-                        "accent": [255, 100, 100]
-                    }
+                    reactive_colors = {"primary": [255, 50, 50], "secondary": [255, 150, 150],
+                                       "background": [40, 20, 20], "surface": [50, 25, 25], "text": [255, 200, 200],
+                                       "accent": [255, 100, 100]}
                 else:
-                    reactive_colors = {
-                        "primary": [100, 200, 255],
-                        "secondary": [150, 255, 200],
-                        "background": [20, 30, 40],
-                        "surface": [30, 40, 50],
-                        "text": [240, 250, 255],
-                        "accent": [150, 220, 255]
-                    }
+                    reactive_colors = self.color_schemes.get("Ocean", self.original_theme)
 
                 self.color_schemes["Custom"] = reactive_colors
                 self._apply_theme(theme_name="Custom")
@@ -393,7 +401,7 @@ class DynamicThemeManager:
                 normalized_color = [c / 255.0 for c in color_value[:3]]
                 dpg.set_value(picker_tag, normalized_color)
 
-    ## File operations
+    ## theme saving
     def _save_theme_to_file(self):
         theme_data = {
             "current_theme": self.current_theme,

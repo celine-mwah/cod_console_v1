@@ -5,7 +5,7 @@ import dearpygui.dearpygui as dpg
 class HotkeyManager:
     def __init__(self, app_instance):
         """
-        :param app_instance: A reference to the main app instance.
+        :param app_instance:
         """
         self.app = app_instance
         self.bindable_actions = {
@@ -16,19 +16,9 @@ class HotkeyManager:
         }
 
     def _adjust_fov(self, step):
-        # helper to adjust fov
         current_fov = self.app.ui_vars["doubles"].get("fov", 65.0)
-        min_fov, max_fov = 5.0, 165.0
-
-
         new_fov = current_fov + step
-        new_fov = max(min_fov, min(max_fov, new_fov))  # clamp value
-
-        self.app.ui_vars["doubles"]["fov"] = new_fov
-        if dpg.does_item_exist("fov"):
-            dpg.set_value("fov", new_fov)
-        self.app.memory_manager.execute_command(f"cg_fov {int(new_fov)}")
-
+        self.app._safe_update_fov_ui(new_fov, source="hotkey")
     def _increase_fov(self):
 
         self._adjust_fov(1)  #increase fov by 1
@@ -74,7 +64,7 @@ class HotkeyManager:
             except Exception as e:
                 self.app._add_debug_message(f"Failed to register hotkey '{hotkey}': {e}", is_error=True)
 
-        # Register the persistent hotkeys for FOV adjustment
+        # static hotkeys for fov
         try:
             keyboard.add_hotkey('e', self._increase_fov)
             keyboard.add_hotkey('q', self._decrease_fov)

@@ -10,6 +10,7 @@ class SliderTimelineWidget:
         self.selection_tolerance = 0.2
         self.last_click_time = 0
         self.double_click_threshold = 0.5
+
     def create_timeline(self, parent_tag):
         with dpg.group(parent=parent_tag):
             with dpg.group(horizontal=True):
@@ -52,9 +53,7 @@ class SliderTimelineWidget:
         if dpg.does_item_exist("keyframe_playhead"):
             dpg.set_value("keyframe_playhead", current_time)
 
-
         current_click_time = time.time()
-
 
         if hasattr(self, '_last_slider_value'):
             value_change = abs(current_time - self._last_slider_value)
@@ -62,7 +61,6 @@ class SliderTimelineWidget:
                 self._handle_timeline_click(current_time)
 
         self._last_slider_value = current_time
-
 
         if hasattr(self.app, '_scrub_to_time') and not self.app.sun_animator.is_animating:
             self.app._scrub_to_time(None, current_time)
@@ -74,7 +72,6 @@ class SliderTimelineWidget:
         if nearest_kf_index is not None:
             kf = self.app.current_keyframes[nearest_kf_index]
             distance = abs(kf['time'] - click_time)
-
 
             if distance <= self.selection_tolerance:
                 self._toggle_keyframe_selection(nearest_kf_index)
@@ -103,7 +100,6 @@ class SliderTimelineWidget:
             keyframes_copy = [kf.copy() for kf in self.app.current_keyframes]
             current_state = keyframes_copy[keyframe_index].get('selected', False)
             keyframes_copy[keyframe_index]['selected'] = not current_state
-
 
             self.app._execute_keyframe_action(keyframes_copy, f"Toggle KF {keyframe_index} Selection")
 
@@ -138,7 +134,6 @@ class SliderTimelineWidget:
             dpg.set_value("interactive_timeline_slider", time_position)
         if dpg.does_item_exist("keyframe_playhead"):
             dpg.set_value("keyframe_playhead", time_position)
-
 
         if hasattr(self.app, '_scrub_to_time'):
             self.app._scrub_to_time(None, time_position)
@@ -193,14 +188,12 @@ class SliderTimelineWidget:
                 pos = int((kf['time'] / total_duration) * (timeline_length - 1))
                 pos = max(0, min(timeline_length - 1, pos))
 
-
                 if kf.get('selected', False):
                     timeline_chars[pos] = '●'
                 else:
                     timeline_chars[pos] = '○'
 
         timeline_str = ''.join(timeline_chars)
-
 
         display_text = f"Timeline: [{timeline_str}]\nKeyframes: {len(self.app.current_keyframes)} total"
         if self.app.current_keyframes:
@@ -252,7 +245,7 @@ class EnhancedKeyframeEditor:
             "fog_color": {"default": [1.0, 1.0, 1.0], "label": "Fog Color"}
         }
 
-        self.selected_properties = set(self.keyframeable_properties.keys())
+        self.selected_properties = set(self.keyframeable_properties.keys()) | set(self.color_properties.keys())
         self.keyframe_templates = self._load_keyframe_templates()
 
     def _load_keyframe_templates(self):
@@ -292,175 +285,15 @@ class EnhancedKeyframeEditor:
             ]
         }
 
-    def create_keyframe_tab_ui(self, parent_tag):
-
-        with dpg.group(horizontal=True):
-            dpg.add_button(label="Undo", tag="kf_undo_button", callback=self.app.history_manager.undo, enabled=False)
-            dpg.add_button(label="Redo", tag="kf_redo_button", callback=self.app.history_manager.redo, enabled=False)
-            dpg.add_separator()
-            dpg.add_text("Animation Duration:")
-            dpg.add_input_float(tag="keyframe_total_duration", default_value=10.0, min_value=0.1, width=100,
-                                callback=self._on_duration_change)
-            dpg.add_text("seconds")
-
-        dpg.add_separator()
-
-        dpg.add_text("Interactive Timeline", color=(255, 255, 0))
-        self.timeline_widget.create_timeline(parent_tag)
-
-        dpg.add_separator()
-
-        dpg.add_text("Quick Property Controls", color=(255, 255, 0))
-        with dpg.group(horizontal=True):
-            with dpg.child_window(width=200, height=200, border=True):
-                dpg.add_text("Sun Properties", color=(255, 255, 0))
-                dpg.add_slider_float(label="Strength", tag="kf_sun_strength", width=170,
-                                     default_value=self.app.ui_vars["doubles"]["sun_strength"],
-                                     min_value=0.0, max_value=8.0,
-                                     callback=self._sync_property_value, user_data="sun_strength")
-                dpg.add_slider_float(label="Direction X", tag="kf_sun_direction_x", width=170,
-                                     default_value=self.app.ui_vars["doubles"]["sun_direction_x"],
-                                     min_value=-360.0, max_value=360.0,
-                                     callback=self._sync_property_value, user_data="sun_direction_x")
-                dpg.add_slider_float(label="Direction Y", tag="kf_sun_direction_y", width=170,
-                                     default_value=self.app.ui_vars["doubles"]["sun_direction_y"],
-                                     min_value=-360.0, max_value=360.0,
-                                     callback=self._sync_property_value, user_data="sun_direction_y")
-                dpg.add_color_edit(label="Sun Color", tag="kf_sun_color", no_alpha=True, width=190,
-                                   default_value=[c / 2.0 for c in self.app.ui_vars["colors"]["sun_color"]],
-                                   callback=self._sync_color_value, user_data="sun_color")
-
-            with dpg.child_window(width=200, height=200, border=True):
-                dpg.add_text("Visual Properties", color=(255, 255, 0))
-                dpg.add_slider_float(label="FOV", tag="kf_fov", width=170,
-                                     default_value=self.app.ui_vars["doubles"]["fov"],
-                                     min_value=5.0, max_value=165.0,
-                                     callback=self._sync_property_value, user_data="fov")
-                dpg.add_slider_float(label="Brightness", tag="kf_brightness", width=170,
-                                     default_value=self.app.ui_vars["doubles"]["brightness"],
-                                     min_value=-1.0, max_value=1.0,
-                                     callback=self._sync_property_value, user_data="brightness")
-                dpg.add_slider_float(label="Contrast", tag="kf_contrast", width=170,
-                                     default_value=self.app.ui_vars["doubles"]["contrast"],
-                                     min_value=0.0, max_value=4.0,
-                                     callback=self._sync_property_value, user_data="contrast")
-                dpg.add_slider_float(label="Desaturation", tag="kf_desaturation", width=170,
-                                     default_value=self.app.ui_vars["doubles"]["desaturation"],
-                                     min_value=0.0, max_value=1.0,
-                                     callback=self._sync_property_value, user_data="desaturation")
-
-            with dpg.child_window(width=200, height=200, border=True):
-                dpg.add_text("Fog & Tints", color=(255, 255, 0))
-                dpg.add_slider_float(label="Fog Density", tag="kf_fog_start", width=170,
-                                     default_value=self.app.ui_vars["doubles"]["fog_start"],
-                                     min_value=1.0, max_value=9999.0,
-                                     callback=self._sync_property_value, user_data="fog_start")
-                dpg.add_color_edit(label="Fog Color", tag="kf_fog_color", no_alpha=True, width=190,
-                                   default_value=[c / 2.0 for c in self.app.ui_vars["colors"]["fog_color"]],
-                                   callback=self._sync_color_value, user_data="fog_color")
-                dpg.add_color_edit(label="Light Tint", tag="kf_light_color", no_alpha=True, width=190,
-                                   default_value=[c / 2.0 for c in self.app.ui_vars["colors"]["light_color"]],
-                                   callback=self._sync_color_value, user_data="light_color")
-                dpg.add_color_edit(label="Dark Tint", tag="kf_dark_color", no_alpha=True, width=190,
-                                   default_value=[c / 2.0 for c in self.app.ui_vars["colors"]["dark_color"]],
-                                   callback=self._sync_color_value, user_data="dark_color")
-
-        dpg.add_separator()
-
-        # keyframe options
-        dpg.add_text("Keyframe Options", color=(255, 255, 0))
-        with dpg.group(horizontal=True):
-            dpg.add_button(label="Add Keyframe", callback=self._add_selective_keyframe, width=110)
-            dpg.add_button(label="Update Selected", callback=self._update_selected_keyframes, width=110)
-            dpg.add_button(label="Delete Selected", callback=self._delete_selected_keyframes, width=110)
-            dpg.add_button(label="Copy", callback=self._copy_selected_keyframes, width=60)
-            dpg.add_button(label="Paste", callback=self._paste_keyframes, width=60)
-
-        with dpg.group(horizontal=True):
-            dpg.add_combo(label="Easing", tag="bulk_easing_combo",
-                          items=["Linear", "Smooth", "Ease-In", "Ease-Out"],
-                          callback=self._apply_bulk_easing, width=120)
-            dpg.add_button(label="Reverse Selected", callback=self._reverse_selected_keyframes, width=110)
-            dpg.add_button(label="Distribute Evenly", callback=self._distribute_keyframes_evenly, width=110)
-
-        with dpg.group(horizontal=True):
-            dpg.add_combo(label="Template", tag="keyframe_template_combo",
-                          items=list(self.keyframe_templates.keys()), width=150)
-            dpg.add_button(label="Load", callback=self._load_keyframe_template, width=60)
-            dpg.add_input_text(label="Save As", tag="template_name_input", width=120)
-            dpg.add_button(label="Save", callback=self._save_keyframe_template, width=60)
-
-        dpg.add_separator()
-
-        with dpg.collapsing_header(label="Property Selection", default_open=False):
-            dpg.add_text("Choose which properties to keyframe:")
-            with dpg.group(horizontal=True):
-                dpg.add_button(label="All", callback=lambda: self._select_all_properties(True), width=50)
-                dpg.add_button(label="None", callback=lambda: self._select_all_properties(False), width=50)
-                dpg.add_button(label="Sun Only", callback=self._select_sun_properties, width=70)
-                dpg.add_button(label="Visual Only", callback=self._select_visual_properties, width=70)
-                dpg.add_button(label="Fog Only", callback=self._select_fog_properties, width=70)
-                dpg.add_button(label="Tints Only", callback=self._select_tint_properties, width=70)
-
-            with dpg.group(horizontal=True):
-                with dpg.child_window(width=180, height=120):
-                    dpg.add_text("Float Properties:")
-                    for prop, info in self.keyframeable_properties.items():
-                        dpg.add_checkbox(label=info["label"], tag=f"kf_prop_{prop}",
-                                         default_value=True,
-                                         callback=lambda s, d, u=prop: self._toggle_property_selection(u, d))
-
-                with dpg.child_window(width=180, height=120):
-                    dpg.add_text("Color Properties:")
-                    for prop, info in self.color_properties.items():
-                        dpg.add_checkbox(label=info["label"], tag=f"kf_prop_{prop}",
-                                         default_value=True,
-                                         callback=lambda s, d, u=prop: self._toggle_property_selection(u, d))
-
-                with dpg.child_window(width=200, height=120):
-                    dpg.add_text("Quick Selections:")
-                    dpg.add_text("• Sun Only: Sun properties")
-                    dpg.add_text("• Visual Only: Brightness, etc.")
-                    dpg.add_text("• Fog Only: Fog density & color")
-                    dpg.add_text("• Tints Only: All color tints")
-                    dpg.add_separator()
-                    dpg.add_text(
-                        "Tip: Use 'Add KF Here' button\nto keyframe only selected props\nat current timeline position.")
-
-        with dpg.collapsing_header(label="Validation & Preview", default_open=False):
-            with dpg.group(horizontal=True):
-                dpg.add_button(label="Validate Keyframes", callback=self._validate_keyframes, width=130)
-                dpg.add_button(label="Show Interpolation", callback=self._show_interpolation_preview, width=130)
-                dpg.add_checkbox(label="Auto-validate", tag="auto_validate", default_value=True)
-
-            dpg.add_text("", tag="validation_status", color=(100, 255, 100))
-
-        dpg.add_separator()
-
-        dpg.add_text("Animation Control", color=(255, 255, 0))
-        with dpg.group(horizontal=True):
-            dpg.add_button(label="Start Keyframe Animation", callback=self.app.start_animation,
-                           width=200, height=30)
-            dpg.add_button(label="Stop All Effects", callback=self.app.stop_animation,
-                           width=150, height=30)
-
-        dpg.add_separator()
-
-        # Keyframe list - moved to bottom
-        dpg.add_text("Keyframe List", color=(255, 255, 0))
-        with dpg.child_window(height=250, tag="enhanced_keyframe_container"):
-            with dpg.table(header_row=True, tag="enhanced_keyframe_table",
-                           resizable=True, policy=dpg.mvTable_SizingStretchProp, scrollY=True):
-                dpg.add_table_column(label="Sel", width_fixed=True, init_width_or_weight=30)
-                dpg.add_table_column(label="Time", width_fixed=True, init_width_or_weight=80)
-                dpg.add_table_column(label="Easing", width_fixed=True, init_width_or_weight=100)
-                dpg.add_table_column(label="Properties", width_stretch=True, init_width_or_weight=0.5)
-                dpg.add_table_column(label="Actions", width_fixed=True, init_width_or_weight=120)
-
     def _sync_property_value(self, sender, app_data, user_data):
         prop_name = user_data
 
+        if prop_name == "fov":
+            self.app._safe_update_fov_ui(app_data, source="keyframe_editor")
+            return
+
         self.app.ui_vars["doubles"][prop_name] = app_data
+
 
         if dpg.does_item_exist(prop_name):
             dpg.set_value(prop_name, app_data)
@@ -472,7 +305,6 @@ class EnhancedKeyframeEditor:
             "brightness": "r_filmtweakbrightness",
             "contrast": "r_filmtweakcontrast",
             "desaturation": "r_filmtweakdesaturation",
-            "fov": "cg_fov",
             "fog_start": "mvm_fog_start"
         }
 
@@ -482,10 +314,7 @@ class EnhancedKeyframeEditor:
             self.app.memory_manager.execute_command(f"r_lighttweaksundirection {x:.2f} {y:.2f}")
         elif prop_name in command_map:
             command = command_map[prop_name]
-            if prop_name == "fov":
-                self.app.memory_manager.execute_command(f"{command} {int(app_data)}")
-            else:
-                self.app.memory_manager.execute_command(f"{command} {app_data:.2f}")
+            self.app.memory_manager.execute_command(f"{command} {app_data:.2f}")
 
     def _sync_color_value(self, sender, app_data, user_data):
         prop_name = user_data
@@ -493,7 +322,11 @@ class EnhancedKeyframeEditor:
         rgb_internal = [c * 2.0 for c in app_data[:3]]
         self.app.ui_vars["colors"][prop_name] = rgb_internal
 
-        if dpg.does_item_exist(prop_name):
+
+        main_tag = f"main_{prop_name}"
+        if dpg.does_item_exist(main_tag):
+            dpg.set_value(main_tag, app_data)
+        elif dpg.does_item_exist(prop_name):
             dpg.set_value(prop_name, app_data)
 
         command_map = {
@@ -508,13 +341,24 @@ class EnhancedKeyframeEditor:
             self.app.memory_manager.execute_command(
                 f"{command} {rgb_internal[0]:.2f} {rgb_internal[1]:.2f} {rgb_internal[2]:.2f}")
 
+    def _set_property_selection(self, selected_props):
+        all_props = set(self.keyframeable_properties.keys()) | set(self.color_properties.keys())
+        self.selected_properties.clear()
+
+        for prop in all_props:
+            tag = f"kf_prop_{prop}"
+            should_select = prop in selected_props
+            if dpg.does_item_exist(tag):
+                dpg.set_value(tag, should_select)
+            if should_select:
+                self.selected_properties.add(prop)
+
     def _select_sun_properties(self):
         sun_props = {"sun_strength", "sun_direction_x", "sun_direction_y", "sun_color"}
         self._set_property_selection(sun_props)
 
     def _select_visual_properties(self):
-        visual_props = {"brightness", "contrast", "desaturation", "fov", "light_color", "dark_color", "fog_start",
-                        "fog_color"}
+        visual_props = {"brightness", "contrast", "desaturation", "fov", "light_color", "dark_color"}
         self._set_property_selection(visual_props)
 
     def _select_fog_properties(self):
@@ -522,56 +366,8 @@ class EnhancedKeyframeEditor:
         self._set_property_selection(fog_props)
 
     def _select_tint_properties(self):
-        tint_props = {"light_color", "dark_color", "sun_color"}
+        tint_props = {"light_color", "dark_color", "sun_color", "fog_color"}
         self._set_property_selection(tint_props)
-
-    def _set_property_selection(self, selected_props):
-        all_props = set(self.keyframeable_properties.keys()) | set(self.color_properties.keys())
-
-        for prop in all_props:
-            tag = f"kf_prop_{prop}"
-            if dpg.does_item_exist(tag):
-                should_select = prop in selected_props
-                dpg.set_value(tag, should_select)
-                if should_select:
-                    self.selected_properties.add(prop)
-                else:
-                    self.selected_properties.discard(prop)
-
-    def _play_preview_range(self):
-        if len(self.app.current_keyframes) < 2:
-            self.app._add_debug_message("Need at least 2 keyframes for preview.", is_error=True)
-            return
-
-        current_time = self.timeline_widget.get_timeline_position()
-        total_duration = dpg.get_value("keyframe_total_duration")
-
-        preview_duration = min(2.0, total_duration - current_time)
-        if preview_duration <= 0:
-            self.app._add_debug_message("Already at end of timeline.", is_error=True)
-            return
-
-        original_keyframes = copy.deepcopy(self.app.current_keyframes)
-
-        preview_keyframes = []
-        for kf in original_keyframes:
-            if current_time <= kf['time'] <= current_time + preview_duration:
-                adjusted_kf = copy.deepcopy(kf)
-                adjusted_kf['time'] -= current_time
-                preview_keyframes.append(adjusted_kf)
-
-        if len(preview_keyframes) < 2:
-            self.app._add_debug_message("No keyframes in preview range.", is_error=True)
-            return
-
-        self.app._set_keyframable_controls_state(enabled=False)
-        on_complete = lambda: self.app._set_keyframable_controls_state(enabled=True)
-        self.app.sun_animator.animate_from_keyframes(preview_keyframes, preview_duration,
-                                                     self.app.easing_functions, on_complete=on_complete)
-        self.app._add_debug_message(f"Playing {preview_duration:.1f}s preview from {current_time:.1f}s.")
-
-    def create_enhanced_ui(self, parent_tag):
-        pass
 
     def _on_duration_change(self, sender, app_data):
         if dpg.does_item_exist("keyframe_playhead"):
@@ -615,24 +411,23 @@ class EnhancedKeyframeEditor:
         values = {}
         for prop in self.selected_properties:
             if prop in self.keyframeable_properties:
-                kf_tag = f"kf_{prop}"
-                if dpg.does_item_exist(kf_tag):
-                    values[prop] = dpg.get_value(kf_tag)
-                else:
-                    values[prop] = self.app.ui_vars["doubles"].get(prop, self.keyframeable_properties[prop]["default"])
+                current_value = self.app.ui_vars["doubles"].get(prop)
+                if current_value is not None:
+                    values[prop] = current_value
+
             elif prop in self.color_properties:
-                kf_tag = f"kf_{prop}"
-                if dpg.does_item_exist(kf_tag):
-                    # Convert from UI color (0-1) to internal (0-2)
-                    ui_color = dpg.get_value(kf_tag)
-                    values[prop] = [c * 2.0 for c in ui_color[:3]]
-                else:
-                    values[prop] = self.app.ui_vars["colors"].get(prop, self.color_properties[prop]["default"])
+                current_color_list = self.app.ui_vars["colors"].get(prop)
+                if current_color_list:
+                    values[prop] = list(current_color_list)
+
+        if not values:
+            self.app._add_debug_message("No properties selected to keyframe.", is_error=True)
+            return
 
         new_kf = {
             "time": time,
             "easing": "Linear",
-            "selected": False,
+            "selected": False,  ## new keyframe is not selected by default
             "values": values
         }
 
@@ -640,6 +435,7 @@ class EnhancedKeyframeEditor:
         keyframes_copy.sort(key=lambda kf: kf['time'])
 
         self.app._execute_keyframe_action(keyframes_copy, f"Add KF at {time:.2f}s")
+        self.app._add_debug_message(f"Added keyframe with {len(values)} properties at {time:.2f}s.")
 
         if dpg.does_item_exist("auto_validate") and dpg.get_value("auto_validate"):
             self._validate_keyframes()
@@ -652,21 +448,11 @@ class EnhancedKeyframeEditor:
             if kf.get('selected', False):
                 for prop in self.selected_properties:
                     if prop in self.keyframeable_properties:
-                        kf_tag = f"kf_{prop}"
-                        if dpg.does_item_exist(kf_tag):
-                            kf['values'][prop] = dpg.get_value(kf_tag)
-                        else:
-                            kf['values'][prop] = self.app.ui_vars["doubles"].get(prop,
-                                                                                 self.keyframeable_properties[prop][
-                                                                                     "default"])
+                        kf['values'][prop] = self.app.ui_vars["doubles"].get(prop, self.keyframeable_properties[prop][
+                            "default"])
                     elif prop in self.color_properties:
-                        kf_tag = f"kf_{prop}"
-                        if dpg.does_item_exist(kf_tag):
-                            ui_color = dpg.get_value(kf_tag)
-                            kf['values'][prop] = [c * 2.0 for c in ui_color[:3]]
-                        else:
-                            kf['values'][prop] = self.app.ui_vars["colors"].get(prop,
-                                                                                self.color_properties[prop]["default"])
+                        kf['values'][prop] = list(
+                            self.app.ui_vars["colors"].get(prop, self.color_properties[prop]["default"]))
                 updated_count += 1
 
         if updated_count > 0:
@@ -720,7 +506,6 @@ class EnhancedKeyframeEditor:
         time_span = max_time - min_time
 
         keyframes_copy = copy.deepcopy(self.app.current_keyframes)
-
 
         for i, (orig_idx, _) in enumerate(selected_kfs):
             if i == 0 or i == len(selected_kfs) - 1:
@@ -913,26 +698,16 @@ class EnhancedKeyframeEditor:
         for prop in self.keyframeable_properties:
             kf_tag = f"kf_{prop}"
             if dpg.does_item_exist(kf_tag):
-                main_value = None
-                if dpg.does_item_exist(prop):
-                    main_value = dpg.get_value(prop)
-                elif dpg.does_item_exist(f"main_{prop}"):
-                    main_value = dpg.get_value(f"main_{prop}")
-
+                main_value = self.app.ui_vars["doubles"].get(prop)
                 if main_value is not None:
                     dpg.set_value(kf_tag, main_value)
 
         for prop in self.color_properties:
             kf_tag = f"kf_{prop}"
             if dpg.does_item_exist(kf_tag):
-                main_color = None
-                if dpg.does_item_exist(prop):
-                    main_color = dpg.get_value(prop)
-                elif dpg.does_item_exist(f"main_{prop}"):
-                    main_color = dpg.get_value(f"main_{prop}")
-
+                main_color = self.app.ui_vars["colors"].get(prop)
                 if main_color is not None:
-                    dpg.set_value(kf_tag, main_color)
+                    dpg.set_value(kf_tag, [c / 2.0 for c in main_color])
 
     def on_keyframes_changed(self):
         self.timeline_widget.update_timeline()

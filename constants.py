@@ -2,15 +2,15 @@
 GAME_PROFILES = {
     "CoDWaWmp.exe": {
         "friendly_name": "Call of Duty: World at War",
-        "cbuf_addtext": 0x0055C000 ## german binary - the english one doesnt work with
+        "cbuf_addtext": 0x0055C000 ## german binary
     },
     "iw4m.exe": {
         "friendly_name": "Call of Duty: Modern Warfare 2",
-        "cbuf_addtext": 0x0404B2B ## iw4m.exe
+        "cbuf_addtext": 0x0404B2B ## iw4m.exe // iw4x
     },
     "BlackOpsMP.exe": {
         "friendly_name": "Call of Duty: Black Ops",
-        "cbuf_addtext": 0x00624850
+        "cbuf_addtext": 0x0056EFD2 ## find the correct one?
     }
 }
 

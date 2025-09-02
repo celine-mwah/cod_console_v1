@@ -64,7 +64,7 @@ class HotkeyManager:
             except Exception as e:
                 self.app._add_debug_message(f"Failed to register hotkey '{hotkey}': {e}", is_error=True)
 
-        # static hotkeys for fov
+        # static hotkeys for fov -- really i should make them customizable
         try:
             keyboard.add_hotkey('e', self._increase_fov)
             keyboard.add_hotkey('q', self._decrease_fov)

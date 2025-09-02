@@ -277,10 +277,12 @@ class SunAnimationSystem:
                 c = values['fog_color']
                 if isinstance(c, list) and len(c) >= 3:
                     self.memory_manager.execute_command(f"mvm_fog_color {c[0]:.2f} {c[1]:.2f} {c[2]:.2f}")
+                    if hasattr(self, '_debug'):
+                        self._debug(f"Setting fog color: {c[0]:.2f} {c[1]:.2f} {c[2]:.2f}")
 
             ## fov is handled different because of glichting
             if 'fov' in values and values['fov'] is not None:
-                self.memory_manager.execute_command(f"cg_fov {values['fov']:.0f}")
+                self.memory_manager.execute_command(f"cg_fov {int(values['fov'])}")
 
             ## update ui callback
             if self.ui_callback:
